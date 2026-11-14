@@ -1,0 +1,14 @@
+{
+  "name": "blinkit-ops-hub",
+  "version": "2.0.0",
+  "description": "Blinkit CX & Dark Store Operations Hub with Admin & Superadmin RBAC",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.22.3",
+    "serverless-http": "^4.0.0"
+  }
+}

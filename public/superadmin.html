@@ -1,0 +1,665 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Superadmin User Console | Blinkit Ops Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060908;
+      --surface: #0f1713;
+      --card: #15211b;
+      --border: rgba(255, 255, 255, 0.09);
+      --primary: #0c831f;
+      --accent: #f8cb46;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Login Overlay */
+    #auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, #1f1b0d, #050806 75%);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .auth-box {
+      background: var(--surface);
+      border: 1px solid rgba(248, 203, 70, 0.3);
+      padding: 2.25rem;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.15rem;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.65);
+    }
+
+    .auth-header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .auth-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #070b09;
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+      font-weight: 800;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .form-group label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-input, select {
+      background: #080d0a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+      outline: none;
+      font-family: inherit;
+      font-size: 0.88rem;
+      width: 100%;
+    }
+    .form-input:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0.9rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header-left, .header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .super-chip {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(248, 203, 70, 0.16);
+      color: var(--accent);
+      border: 1px solid rgba(248, 203, 70, 0.35);
+      text-transform: uppercase;
+    }
+
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.55rem 1rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      text-decoration: none;
+      font-size: 0.82rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: 0.15s ease;
+    }
+    .btn:hover { filter: brightness(1.08); }
+    .btn-accent { background: var(--accent); color: #070b09; }
+    .btn-secondary { background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.09); }
+    .btn-danger { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
+    .btn-danger:hover { background: var(--danger); color: #fff; }
+    .btn-sm { padding: 0.35rem 0.65rem; font-size: 0.75rem; }
+
+    main {
+      max-width: 1280px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 1.5rem 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .stat-label { font-size: 0.76rem; color: var(--text-muted); font-weight: 600; }
+    .stat-val { font-size: 1.75rem; font-weight: 800; margin-top: 0.35rem; color: var(--accent); }
+
+    .grid-two {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+    .card h3 {
+      font-size: 1.05rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.65rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 0.6rem;
+      text-align: left;
+    }
+    th {
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .role-pill {
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+    .role-superadmin { background: rgba(248, 203, 70, 0.18); color: var(--accent); }
+    .role-admin { background: rgba(59, 130, 246, 0.18); color: #60a5fa; }
+
+    .status-active { color: #4ade80; font-weight: 700; font-size: 0.78rem; }
+    .status-suspended { color: #f87171; font-weight: 700; font-size: 0.78rem; }
+
+    .audit-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .audit-row {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      gap: 1rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 1.75rem;
+      right: 1.75rem;
+      background: var(--primary);
+      color: #fff;
+      padding: 0.85rem 1.4rem;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.86rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      opacity: 0;
+      transition: 0.2s ease;
+      pointer-events: none;
+      z-index: 10000;
+    }
+    .toast.show { opacity: 1; }
+
+    @media (max-width: 960px) {
+      .grid-two { grid-template-columns: 1fr; }
+    }
+  
+    html {
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(248, 203, 70, 0.45) rgba(255, 255, 255, 0.03);
+    }
+    body.light-theme {
+      scrollbar-color: rgba(12, 131, 31, 0.45) rgba(15, 23, 42, 0.05);
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    body.light-theme ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.04);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(12, 131, 31, 0.75), rgba(248, 203, 70, 0.65));
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background-clip: content-box;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #0c831f, #f8cb46);
+      border: 1px solid transparent;
+      background-clip: content-box;
+    }
+    #scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary-color, #0c831f), var(--accent-color, #f8cb46));
+      box-shadow: 0 0 10px rgba(248, 203, 70, 0.5);
+      z-index: 9999;
+      transition: width 0.08s linear;
+      pointer-events: none;
+    }
+    #scroll-top-btn {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(18, 28, 23, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(248, 203, 70, 0.35);
+      color: var(--accent-color, #f8cb46);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      transform: translateY(14px);
+      pointer-events: none;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 900;
+    }
+    body.light-theme #scroll-top-btn {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: rgba(12, 131, 31, 0.35);
+      color: var(--primary-color, #0c831f);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+    }
+    #scroll-top-btn.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    #scroll-top-btn:hover {
+      transform: translateY(-3px);
+      background: var(--accent-color, #f8cb46);
+      color: #070b09;
+      border-color: var(--accent-color, #f8cb46);
+    }
+
+  </style>
+</head>
+<body>
+
+  <div id="scroll-progress"></div>
+  <button type="button" id="scroll-top-btn" title="Back to top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
+
+
+  <!-- Superadmin Login Gate -->
+  <div id="auth-overlay">
+    <form class="auth-box" onsubmit="handleSuperLogin(event)">
+      <div class="auth-header">
+        <div class="auth-badge">🛡️</div>
+        <h2>Superadmin Console</h2>
+        <p style="font-size:0.82rem; color:var(--text-muted);">Restricted to Superadmin accounts only</p>
+      </div>
+      <div class="form-group">
+        <label>Superadmin Username</label>
+        <input type="text" id="sa-user" class="form-input" placeholder="taz" required autofocus>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="sa-pass" class="form-input" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-accent" style="justify-content:center; padding:0.75rem;">Unlock User Management</button>
+      <div id="sa-error" style="color:var(--danger); font-size:0.8rem; text-align:center; display:none;"></div>
+      <div style="text-align:center;">
+        <a href="/" style="font-size:0.78rem; color:var(--text-muted); text-decoration:none;">← Return to Hub</a>
+      </div>
+    </form>
+  </div>
+
+  <header>
+    <div class="header-left">
+      <h2>🛡️ Superadmin User Console</h2>
+      <span id="sa-badge" class="super-chip">SUPERADMIN</span>
+    </div>
+    <div class="header-right">
+      <a href="/admin" class="btn btn-secondary">⚙️ Hub Content Editor</a>
+      <a href="/" target="_blank" class="btn btn-secondary">Live Hub ↗</a>
+      <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Accounts</div>
+        <div class="stat-val" id="stat-total">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Admins</div>
+        <div class="stat-val" id="stat-active" style="color:#4ade80;">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Superadmins</div>
+        <div class="stat-val" id="stat-super">0</div>
+      </div>
+    </div>
+
+    <div class="grid-two">
+      <!-- Add Admin User Form -->
+      <form class="card" onsubmit="createUser(event)">
+        <h3>➕ Add New Admin User</h3>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="new-username" class="form-input" placeholder="e.g. rahul_ops" required minlength="3">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <div style="display:flex; gap:0.4rem;">
+            <input type="text" id="new-password" class="form-input" placeholder="Min 6 characters" required minlength="6">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="generatePass()" title="Generate strong password">🎲</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Access Role</label>
+          <select id="new-role" class="form-input">
+            <option value="admin">Admin (Edit Hub Links & Theme)</option>
+            <option value="superadmin">Superadmin (Full Access + Users)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-accent" style="justify-content:center;">Create Account</button>
+      </form>
+
+      <!-- Existing Users Table -->
+      <div class="card">
+        <h3>👥 Authorized Admin Accounts</h3>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audit Log -->
+    <div class="card">
+      <h3>📜 Recent Security & Config Audit Log</h3>
+      <div class="audit-list" id="audit-list"></div>
+    </div>
+  </main>
+
+  <div id="toast" class="toast">Done!</div>
+
+  <script>
+    let currentUser = null;
+
+    async function checkSuperSession() {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user.role === 'superadmin') {
+            currentUser = data.user;
+            onSuperUnlocked();
+          } else {
+            document.getElementById('sa-error').textContent = 'Logged in as standard admin. Please log in with Superadmin credentials.';
+            document.getElementById('sa-error').style.display = 'block';
+          }
+        }
+      } catch (e) {}
+    }
+
+    async function handleSuperLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('sa-user').value.trim();
+      const password = document.getElementById('sa-pass').value;
+      const err = document.getElementById('sa-error');
+      err.style.display = 'none';
+
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, requiredRole: 'superadmin' })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        currentUser = data.user;
+        onSuperUnlocked();
+      } else {
+        err.textContent = data.error || 'Access denied';
+        err.style.display = 'block';
+      }
+    }
+
+    async function logout() {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      location.reload();
+    }
+
+    function onSuperUnlocked() {
+      document.getElementById('auth-overlay').style.display = 'none';
+      document.getElementById('sa-badge').textContent = `@${currentUser.username} • SUPERADMIN`;
+      loadOverview();
+    }
+
+    function generatePass() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789@#';
+      let out = '';
+      for (let i = 0; i < 10; i++) out += chars[Math.floor(Math.random() * chars.length)];
+      document.getElementById('new-password').value = out;
+    }
+
+    async function loadOverview() {
+      const res = await fetch('/api/superadmin/overview');
+      if (!res.ok) return;
+      const { users, auditLog } = await res.json();
+
+      document.getElementById('stat-total').textContent = users.length;
+      document.getElementById('stat-active').textContent = users.filter(u => u.active).length;
+      document.getElementById('stat-super').textContent = users.filter(u => u.role === 'superadmin').length;
+
+      document.getElementById('users-tbody').innerHTML = users.map(u => {
+        const isPrimary = u.username.toLowerCase() === 'taz';
+        const lastLogin = u.lastLogin ? new Date(u.lastLogin).toLocaleString() : 'Never';
+        return `
+          <tr>
+            <td><strong>${u.username}</strong> ${isPrimary ? '<span style="font-size:0.7rem; color:var(--accent);">(Root)</span>' : ''}</td>
+            <td><span class="role-pill role-${u.role}">${u.role}</span></td>
+            <td><span class="${u.active ? 'status-active' : 'status-suspended'}">${u.active ? '● Active' : '● Suspended'}</span></td>
+            <td style="color:var(--text-muted); font-size:0.78rem;">${lastLogin}</td>
+            <td>
+              <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                <button class="btn btn-secondary btn-sm" onclick="resetUserPassword('${u.id}', '${u.username}')">Reset Pass</button>
+                ${!isPrimary ? `
+                  <button class="btn btn-secondary btn-sm" onclick="toggleUserActive('${u.id}', ${!u.active})">${u.active ? 'Suspend' : 'Activate'}</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}', '${u.username}')">Delete</button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('audit-list').innerHTML = (auditLog || []).map(item => `
+        <div class="audit-row">
+          <div><strong>@${item.by}</strong> — ${item.action}</div>
+          <div style="color:var(--text-muted); font-size:0.74rem; white-space:nowrap;">${new Date(item.at).toLocaleString()}</div>
+        </div>
+      `).join('');
+    }
+
+    async function createUser(e) {
+      e.preventDefault();
+      const username = document.getElementById('new-username').value.trim();
+      const password = document.getElementById('new-password').value;
+      const role = document.getElementById('new-role').value;
+
+      const res = await fetch('/api/superadmin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, role })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        document.getElementById('new-username').value = '';
+        document.getElementById('new-password').value = '';
+        showToast(`Created user "${username}"!`);
+        loadOverview();
+      } else {
+        alert(data.error || 'Failed to create user.');
+      }
+    }
+
+    async function resetUserPassword(id, username) {
+      const newPass = prompt(`Enter new password for "${username}" (minimum 6 characters):`);
+      if (!newPass) return;
+      const res = await fetch(`/api/superadmin/users/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: newPass })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast(`Password reset for "${username}"!`);
+        loadOverview();
+      } else {
+        alert(data.error || 'Password reset failed.');
+      }
+    }
+
+    async function toggleUserActive(id, active) {
+      const res = await fetch(`/api/superadmin/users/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active })
+      });
+      if (res.ok) {
+        showToast(active ? 'Account activated' : 'Account suspended');
+        loadOverview();
+      }
+    }
+
+    async function deleteUser(id, username) {
+      if (!confirm(`Permanently delete user "${username}"?`)) return;
+      const res = await fetch(`/api/superadmin/users/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        showToast(`Deleted "${username}"`);
+        loadOverview();
+      } else {
+        alert(data.error || 'Could not delete user.');
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    checkSuperSession();
+  </script>
+
+  <script>
+    (function initSmoothScrollUI() {
+      const bar = document.getElementById('scroll-progress');
+      const btn = document.getElementById('scroll-top-btn');
+      function onScroll() {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        if (bar) {
+          bar.style.width = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) + '%' : '0%';
+        }
+        if (btn) {
+          btn.classList.toggle('visible', scrollTop > 220);
+        }
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+  </script>
+
+</body>
+</html>

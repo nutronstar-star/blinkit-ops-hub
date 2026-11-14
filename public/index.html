@@ -1,0 +1,1245 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blinkit Ops Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #060908;
+      --bg-surface: rgba(11, 17, 14, 0.86);
+      --bg-card: #0e1612;
+      --bg-card-hover: #14201a;
+      --border-subtle: rgba(255, 255, 255, 0.07);
+      --border-strong: rgba(255, 255, 255, 0.14);
+      --border-hover: rgba(248, 203, 70, 0.5);
+      --primary-color: #0c831f;
+      --accent-color: #f8cb46;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.45);
+      --shadow-hover: 0 14px 30px -6px rgba(0, 0, 0, 0.65);
+      --transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body.light-theme {
+      --bg-main: #f5f7f6;
+      --bg-surface: rgba(255, 255, 255, 0.9);
+      --bg-card: #ffffff;
+      --bg-card-hover: #f9fbfa;
+      --border-subtle: rgba(15, 23, 42, 0.08);
+      --border-strong: rgba(15, 23, 42, 0.14);
+      --border-hover: rgba(12, 131, 31, 0.5);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-hover: 0 12px 24px -6px rgba(15, 23, 42, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { max-width: 100%; overflow-x: hidden; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      background-image:
+        radial-gradient(ellipse 60% 35% at 50% -12%, rgba(12, 131, 31, 0.16), transparent 70%),
+        radial-gradient(ellipse 40% 25% at 88% 0%, rgba(248, 203, 70, 0.07), transparent 65%);
+      background-attachment: fixed;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* Shift Announcement Banner */
+    .shift-banner {
+      display: none;
+      padding: 0.55rem 1.5rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border-subtle);
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+    }
+    .shift-banner.info { background: rgba(12, 131, 31, 0.16); color: #86efac; }
+    .shift-banner.warning { background: rgba(248, 203, 70, 0.16); color: #fde047; }
+    .shift-banner.critical { background: rgba(239, 68, 68, 0.18); color: #fca5a5; }
+    body.light-theme .shift-banner.info { background: #dcfce7; color: #166534; }
+    body.light-theme .shift-banner.warning { background: #fef9c3; color: #854d0e; }
+    body.light-theme .shift-banner.critical { background: #fee2e2; color: #991b1b; }
+
+    /* Header */
+    header {
+      background-color: var(--bg-surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0.7rem 1.75rem;
+    }
+
+    .header-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .brand-logo-box {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-color), #eab308);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      box-shadow: 0 2px 10px rgba(248, 203, 70, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .brand-logo-box.has-image {
+      background: #ffffff;
+      padding: 3px;
+    }
+
+    .brand-logo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      border-radius: 7px;
+    }
+
+    .brand-logo-fallback {
+      color: #070b09;
+      font-weight: 800;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-tag {
+      font-size: 0.64rem;
+      font-weight: 700;
+      background: var(--primary-color);
+      color: #ffffff;
+      padding: 2px 7px;
+      border-radius: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .brand-sub {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .pulse-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.25rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.81rem;
+      font-weight: 500;
+      padding: 0.42rem 0.75rem;
+      border-radius: 7px;
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+
+    .nav-links a:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    body.light-theme .nav-links a:hover {
+      background: rgba(15, 23, 42, 0.05);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .search-wrapper {
+      position: relative;
+      min-width: 265px;
+    }
+
+    .search-input {
+      width: 100%;
+      background-color: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 0.5rem 3.4rem 0.5rem 2.2rem;
+      font-size: 0.82rem;
+      border-radius: 8px;
+      outline: none;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+
+    body.light-theme .search-input {
+      background-color: #f1f5f9;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-color);
+      background-color: rgba(255, 255, 255, 0.07);
+      box-shadow: 0 0 0 3px rgba(248, 203, 70, 0.14);
+    }
+
+    .search-svg {
+      position: absolute;
+      left: 0.72rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .kbd-hint {
+      position: absolute;
+      right: 0.55rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      padding: 2px 5px;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .portal-btn {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.48rem 0.8rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.02);
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition);
+    }
+
+    .portal-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    body.light-theme .portal-btn:hover {
+      background: #f1f5f9;
+    }
+
+    /* Category Filter Bar */
+    .filter-bar {
+      max-width: 1440px;
+      width: 100%;
+      margin: 1.25rem auto 0;
+      padding: 0 1.75rem;
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+
+    .filter-pill:hover {
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .filter-pill.active {
+      background: var(--primary-color);
+      color: #ffffff;
+      border-color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    /* Main Workspace */
+    main {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 1.75rem 4rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2.25rem;
+    }
+
+    .category-block {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .category-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .category-accent-bar {
+      width: 4px;
+      height: 18px;
+      border-radius: 4px;
+      background: var(--accent-color);
+    }
+
+    .category-icon {
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .category-name {
+      font-size: 0.98rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .category-count {
+      font-size: 0.72rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 0.95rem;
+    }
+
+    .link-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.15rem 1.2rem;
+      text-decoration: none;
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 0.9rem;
+      position: relative;
+      box-shadow: var(--shadow-card);
+      transition: var(--transition);
+    }
+
+    .link-card:hover {
+      background-color: var(--bg-card-hover);
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .link-card.status-maintenance {
+      opacity: 0.58;
+      border-style: dashed;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .card-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .tag-pill {
+      font-size: 0.63rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .tag-blue { background: rgba(59, 130, 246, 0.14); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.25); }
+    .tag-amber { background: rgba(248, 203, 70, 0.14); color: #f8cb46; border: 1px solid rgba(248, 203, 70, 0.25); }
+    .tag-purple { background: rgba(168, 85, 247, 0.14); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.25); }
+    .tag-emerald { background: rgba(16, 185, 129, 0.14); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.25); }
+    .tag-rose { background: rgba(244, 63, 94, 0.14); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.25); }
+
+    body.light-theme .tag-amber { color: #b45309; background: #fef3c7; border-color: #fde68a; }
+    body.light-theme .tag-emerald { color: #047857; background: #d1fae5; border-color: #a7f3d0; }
+
+    .status-chip {
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .chip-vpn { background: rgba(245, 158, 11, 0.14); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .chip-internal { background: rgba(59, 130, 246, 0.14); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .chip-maintenance { background: rgba(239, 68, 68, 0.16); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .pin-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 3px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    .pin-btn:hover {
+      color: var(--accent-color);
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .pin-btn.pinned {
+      color: var(--accent-color);
+    }
+
+    .ext-icon {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      transition: var(--transition);
+    }
+
+    .link-card:hover .ext-icon {
+      color: var(--accent-color);
+      transform: translate(2px, -2px);
+    }
+
+    .card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.35;
+    }
+
+    .card-footer {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding-top: 0.55rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      flex-shrink: 0;
+    }
+
+    /* Footer */
+    footer {
+      background-color: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      padding: 1.15rem 1.75rem;
+      margin-top: auto;
+    }
+
+    .footer-content {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+    .footer-links a:hover {
+      color: var(--accent-color);
+    }
+  
+    html {
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(248, 203, 70, 0.45) rgba(255, 255, 255, 0.03);
+    }
+    body.light-theme {
+      scrollbar-color: rgba(12, 131, 31, 0.45) rgba(15, 23, 42, 0.05);
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    body.light-theme ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.04);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(12, 131, 31, 0.75), rgba(248, 203, 70, 0.65));
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background-clip: content-box;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #0c831f, #f8cb46);
+      border: 1px solid transparent;
+      background-clip: content-box;
+    }
+    #scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary-color, #0c831f), var(--accent-color, #f8cb46));
+      box-shadow: 0 0 10px rgba(248, 203, 70, 0.5);
+      z-index: 9999;
+      transition: width 0.08s linear;
+      pointer-events: none;
+    }
+    #scroll-top-btn {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(18, 28, 23, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(248, 203, 70, 0.35);
+      color: var(--accent-color, #f8cb46);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      transform: translateY(14px);
+      pointer-events: none;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 900;
+    }
+    body.light-theme #scroll-top-btn {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: rgba(12, 131, 31, 0.35);
+      color: var(--primary-color, #0c831f);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+    }
+    #scroll-top-btn.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    #scroll-top-btn:hover {
+      transform: translateY(-3px);
+      background: var(--accent-color, #f8cb46);
+      color: #070b09;
+      border-color: var(--accent-color, #f8cb46);
+    }
+
+  
+    /* === WAKEUP LOADER === */
+    #wakeup-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 9500;
+      background: rgba(6, 9, 8, 0.92);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      opacity: 1;
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s ease;
+    }
+    body.light-theme #wakeup-loader {
+      background: rgba(245, 247, 246, 0.94);
+    }
+    #wakeup-loader.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .wakeup-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--bg-card, #0e1612);
+      border: 1px solid rgba(248, 203, 70, 0.28);
+      border-radius: 18px;
+      padding: 2.25rem 2rem;
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.15rem;
+    }
+    body.light-theme .wakeup-card {
+      background: #ffffff;
+      border-color: rgba(12, 131, 31, 0.25);
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
+    }
+    .wakeup-orb-wrap {
+      position: relative;
+      width: 74px;
+      height: 74px;
+      display: grid;
+      place-items: center;
+    }
+    .wakeup-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2.5px solid transparent;
+      border-top-color: var(--accent-color, #f8cb46);
+      border-right-color: var(--primary-color, #0c831f);
+      animation: wakeupSpin 1.1s linear infinite;
+    }
+    .wakeup-ring-inner {
+      position: absolute;
+      inset: 8px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      border-bottom-color: var(--accent-color, #f8cb46);
+      opacity: 0.6;
+      animation: wakeupSpinReverse 1.8s linear infinite;
+    }
+    .wakeup-core {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-color, #f8cb46), #eab308);
+      color: #070b09;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 0 20px rgba(248, 203, 70, 0.35);
+      animation: wakeupPulse 2s ease-in-out infinite;
+    }
+    .wakeup-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary, #f8fafc);
+    }
+    .wakeup-stage {
+      font-size: 0.84rem;
+      color: var(--text-secondary, #94a3b8);
+      min-height: 1.3em;
+    }
+    .wakeup-progress-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    body.light-theme .wakeup-progress-track {
+      background: rgba(15, 23, 42, 0.08);
+    }
+    .wakeup-progress-fill {
+      height: 100%;
+      width: 8%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--primary-color, #0c831f), var(--accent-color, #f8cb46));
+      transition: width 0.35s ease;
+    }
+    .wakeup-meta {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.74rem;
+      color: var(--text-muted, #64748b);
+      font-variant-numeric: tabular-nums;
+    }
+    .wakeup-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(248, 203, 70, 0.12);
+      color: var(--accent-color, #f8cb46);
+      font-weight: 600;
+    }
+    body.light-theme .wakeup-pill {
+      background: rgba(12, 131, 31, 0.1);
+      color: var(--primary-color, #0c831f);
+    }
+    .wakeup-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: wakeupPulse 1s ease-in-out infinite;
+    }
+    #wakeup-retry-btn {
+      display: none;
+      margin-top: 0.25rem;
+      background: var(--primary-color, #0c831f);
+      color: #ffffff;
+      border: none;
+      padding: 0.5rem 1.1rem;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    @keyframes wakeupSpin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes wakeupSpinReverse {
+      to { transform: rotate(-360deg); }
+    }
+    @keyframes wakeupPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.94); opacity: 0.8; }
+    }
+    /* === END WAKEUP LOADER === */
+
+  </style>
+</head>
+<body>
+<!-- WAKEUP LOADER -->
+  <div id="wakeup-loader" role="status" aria-live="polite">
+    <div class="wakeup-card">
+      <div class="wakeup-orb-wrap">
+        <div class="wakeup-ring"></div>
+        <div class="wakeup-ring-inner"></div>
+        <div class="wakeup-core">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+      </div>
+      <div>
+        <div class="wakeup-title">Starting Operations Hub</div>
+        <div class="wakeup-stage" id="wakeup-stage">Connecting to backend server...</div>
+      </div>
+      <div class="wakeup-progress-track">
+        <div class="wakeup-progress-fill" id="wakeup-progress-fill"></div>
+      </div>
+      <div class="wakeup-meta">
+        <span class="wakeup-pill"><span class="wakeup-dot"></span><span id="wakeup-attempt">Connecting</span></span>
+        <span id="wakeup-timer">0.0s elapsed</span>
+      </div>
+      <button type="button" id="wakeup-retry-btn" onclick="window.location.reload()">Retry Connection</button>
+    </div>
+  </div>
+  <!-- END WAKEUP LOADER -->
+
+  <div id="scroll-progress"></div>
+  <button type="button" id="scroll-top-btn" title="Back to top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
+
+
+  <div id="shift-banner" class="shift-banner info">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="shift-banner-text"></span>
+  </div>
+
+  <header>
+    <div class="header-container">
+      <a href="/" class="brand">
+        <div class="brand-logo-box" id="brand-logo-box">
+          <span class="brand-logo-fallback" id="site-logo-fallback">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </span>
+        </div>
+        <div class="brand-meta">
+          <div class="brand-title-row">
+            <span class="brand-title" id="site-title">Blinkit Ops Hub</span>
+            <span class="brand-tag" id="site-badge">10-MIN CX</span>
+          </div>
+          <div class="brand-sub">
+            <span class="pulse-indicator"></span>
+            <span>Operations Command Directory</span>
+          </div>
+        </div>
+      </a>
+
+      <nav class="nav-links" id="site-nav"></nav>
+
+      <div class="header-actions">
+        <div class="search-wrapper">
+          <svg class="search-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="tool-search" class="search-input" placeholder="Search tools, SOPs..." oninput="applyFilters()">
+          <span class="kbd-hint">Ctrl K</span>
+        </div>
+        <a href="/admin" class="portal-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Admin
+        </a>
+        <a href="/superadmin" class="portal-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Users
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="filter-bar" id="filter-bar"></div>
+
+  <main id="app-container">
+    <div style="text-align:center; padding: 4rem; color: var(--text-muted); font-size:0.88rem;">Loading operations hub...</div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div id="footer-text">Blinkit Quick-Commerce Operations • Internal Operations Portal</div>
+      <div class="footer-links">
+        <span>Maintained by <strong id="footer-author" style="color:var(--text-secondary)">Mr.Anonmus</strong></span>
+        <span>•</span>
+        <a href="/admin">Admin Control</a>
+        <a href="/superadmin">Superadmin</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    let hubData = null;
+    let activeCategory = 'ALL';
+    let pinnedIds = JSON.parse(localStorage.getItem('blinkit_pinned_tools') || '[]');
+
+    function renderLogo(site) {
+      const box = document.getElementById('brand-logo-box');
+      const logoUrl = (site.logoUrl || '').trim();
+      const fallbackText = (site.logoIcon || '').trim();
+
+      const defaultSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+      const fallbackContent = fallbackText && fallbackText !== '⚡' ? fallbackText : defaultSvg;
+
+      if (logoUrl) {
+        box.classList.add('has-image');
+        box.innerHTML = `<img src="${logoUrl}" alt="${site.title || 'Logo'}" onerror="this.parentElement.classList.remove('has-image'); this.parentElement.innerHTML='<span class=\\'brand-logo-fallback\\'>${fallbackContent.replace(/'/g, "\\'")}</span>';">`;
+      } else {
+        box.classList.remove('has-image');
+        box.innerHTML = `<span class="brand-logo-fallback">${fallbackContent}</span>`;
+      }
+    }
+
+    function togglePin(e, id) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (pinnedIds.includes(id)) {
+        pinnedIds = pinnedIds.filter(item => item !== id);
+      } else {
+        pinnedIds.push(id);
+      }
+      localStorage.setItem('blinkit_pinned_tools', JSON.stringify(pinnedIds));
+      renderHub();
+    }
+
+    function selectCategory(catId) {
+      activeCategory = catId;
+      document.querySelectorAll('.filter-pill').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.cat === catId);
+      });
+      applyFilters();
+    }
+
+    function renderCardHTML(item) {
+      const isPinned = pinnedIds.includes(item.id);
+      const status = item.status || 'live';
+      let statusBadge = '';
+      if (status === 'vpn') statusBadge = '<span class="status-chip chip-vpn">VPN</span>';
+      if (status === 'internal') statusBadge = '<span class="status-chip chip-internal">INTERNAL</span>';
+      if (status === 'maintenance') statusBadge = '<span class="status-chip chip-maintenance">MAINT</span>';
+
+      const starSvg = isPinned
+        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
+        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+
+      const extSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>`;
+
+      return `
+        <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="link-card status-${status}" data-text="${(item.title + ' ' + (item.tag || '') + ' ' + (item.footer || '')).toLowerCase()}">
+          <div class="card-top">
+            <div class="card-badges">
+              <span class="tag-pill tag-${item.tagColor || 'emerald'}">${item.tag || 'TOOL'}</span>
+              ${statusBadge}
+            </div>
+            <div class="card-actions">
+              <button type="button" class="pin-btn ${isPinned ? 'pinned' : ''}" title="${isPinned ? 'Unpin tool' : 'Pin to top'}" onclick="togglePin(event, '${item.id}')">${starSvg}</button>
+              <span class="ext-icon">${extSvg}</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-title">${item.title}</div>
+          </div>
+          <div class="card-footer">
+            ${status === 'live' ? '<span class="live-dot"></span>' : ''}
+            <span>${item.footer || 'Operational Tool'}</span>
+          </div>
+        </a>
+      `;
+    }
+
+    function renderHub() {
+      if (!hubData) return;
+      const appContainer = document.getElementById('app-container');
+      const sections = hubData.sections || [];
+
+      const allLinks = sections.flatMap(s => s.links || []);
+      const pinnedLinks = allLinks.filter(l => pinnedIds.includes(l.id));
+
+      let html = '';
+
+      if (pinnedLinks.length > 0) {
+        html += `
+          <section class="category-block" data-sec-id="PINNED">
+            <div class="category-header">
+              <div class="category-title-group">
+                <div class="category-accent-bar"></div>
+                <h2 class="category-name">Pinned Quick Access</h2>
+              </div>
+              <span class="category-count">${pinnedLinks.length} Pinned</span>
+            </div>
+            <div class="links-grid">
+              ${pinnedLinks.map(renderCardHTML).join('')}
+            </div>
+          </section>
+        `;
+      }
+
+      if (sections.length === 0) {
+        html += '<div style="text-align:center; padding: 4rem; color: var(--text-muted);">No sections configured yet. Log into /admin to add tools.</div>';
+      } else {
+        html += sections.map(sec => `
+          <section class="category-block" data-sec-id="${sec.id}">
+            <div class="category-header">
+              <div class="category-title-group">
+                <div class="category-accent-bar"></div>
+                ${sec.icon ? `<span class="category-icon">${sec.icon}</span>` : ''}
+                <h2 class="category-name">${sec.title}</h2>
+              </div>
+              <span class="category-count">${(sec.links || []).length} tools</span>
+            </div>
+            <div class="links-grid">
+              ${(sec.links || []).map(renderCardHTML).join('')}
+            </div>
+          </section>
+        `).join('');
+      }
+
+      appContainer.innerHTML = html;
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const term = document.getElementById('tool-search').value.toLowerCase().trim();
+      const blocks = document.querySelectorAll('.category-block');
+
+      blocks.forEach(block => {
+        const secId = block.dataset.secId;
+        const catMatches = activeCategory === 'ALL' || secId === activeCategory || (secId === 'PINNED' && activeCategory === 'ALL');
+
+        if (!catMatches) {
+          block.style.display = 'none';
+          return;
+        }
+
+        const cards = block.querySelectorAll('.link-card');
+        let visibleCount = 0;
+        cards.forEach(card => {
+          const matches = !term || card.dataset.text.includes(term);
+          card.style.display = matches ? 'flex' : 'none';
+          if (matches) visibleCount++;
+        });
+
+        block.style.display = visibleCount > 0 ? 'flex' : 'none';
+      });
+    }
+
+    async function fetchConfigWithWakeup() {
+      const stageEl = document.getElementById('wakeup-stage');
+      const fillEl = document.getElementById('wakeup-progress-fill');
+      const timerEl = document.getElementById('wakeup-timer');
+      const attemptEl = document.getElementById('wakeup-attempt');
+      const retryBtn = document.getElementById('wakeup-retry-btn');
+
+      const startTime = Date.now();
+      let attempt = 0;
+
+      const ticker = setInterval(() => {
+        const sec = (Date.now() - startTime) / 1000;
+        if (timerEl) timerEl.textContent = sec.toFixed(1) + 's elapsed';
+
+        const pct = Math.min(94, 10 + (1 - Math.exp(-sec / 14)) * 84);
+        if (fillEl) fillEl.style.width = pct.toFixed(1) + '%';
+
+        if (stageEl) {
+          if (sec < 2.5) {
+            stageEl.textContent = 'Connecting to backend server...';
+          } else if (sec < 10) {
+            stageEl.textContent = 'Waking up sleeping backend instance...';
+          } else if (sec < 25) {
+            stageEl.textContent = 'Spinning up Node.js runtime & directory...';
+          } else if (sec < 45) {
+            stageEl.textContent = 'Cold start in progress ? usually takes 30?50s...';
+          } else {
+            stageEl.textContent = 'Still waiting for host response...';
+            if (retryBtn) retryBtn.style.display = 'inline-block';
+          }
+        }
+      }, 150);
+
+      try {
+        while (true) {
+          attempt++;
+          if (attemptEl) attemptEl.textContent = attempt === 1 ? 'Connecting' : 'Wakeup ping #' + attempt;
+
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+            const res = await fetch('/api/config', {
+              cache: 'no-store',
+              signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (res.ok) {
+              const data = await res.json();
+              if (fillEl) fillEl.style.width = '100%';
+              if (stageEl) stageEl.textContent = 'Connected! Loading workspace...';
+              return data;
+            }
+          } catch (err) {
+            // Backend still waking up (502/503/timeout); wait briefly and retry
+          }
+
+          await new Promise(r => setTimeout(r, 2200));
+        }
+      } finally {
+        clearInterval(ticker);
+      }
+    }
+
+    async function loadHub() {
+      const appContainer = document.getElementById('app-container');
+      const loaderEl = document.getElementById('wakeup-loader');
+      try {
+        hubData = await fetchConfigWithWakeup();
+
+        if (hubData.theme) {
+          document.body.classList.toggle('light-theme', hubData.theme.mode === 'light');
+          if (hubData.theme.primaryColor) {
+            document.documentElement.style.setProperty('--primary-color', hubData.theme.primaryColor);
+          }
+          if (hubData.theme.accentColor) {
+            document.documentElement.style.setProperty('--accent-color', hubData.theme.accentColor);
+          }
+        }
+
+        const banner = document.getElementById('shift-banner');
+        if (hubData.announcement && hubData.announcement.enabled && hubData.announcement.text) {
+          banner.style.display = 'flex';
+          banner.className = `shift-banner ${hubData.announcement.level || 'info'}`;
+          document.getElementById('shift-banner-text').textContent = hubData.announcement.text;
+        } else {
+          banner.style.display = 'none';
+        }
+
+        const site = hubData.site || {};
+        renderLogo(site);
+        document.getElementById('site-title').textContent = site.title || 'Blinkit Ops Hub';
+        document.getElementById('site-badge').textContent = site.badge || '10-MIN CX';
+        document.getElementById('footer-text').textContent = site.footerText || '';
+        document.getElementById('footer-author').textContent = site.author || 'Mr.Anonmus';
+        document.title = `${site.title || 'Blinkit Ops Hub'} | Operations Portal`;
+
+        document.getElementById('site-nav').innerHTML = (hubData.navLinks || []).map(link => `
+          <a href="${link.url}">${link.label}</a>
+        `).join('');
+
+        const filterBar = document.getElementById('filter-bar');
+        filterBar.innerHTML = `
+          <button class="filter-pill active" data-cat="ALL" onclick="selectCategory('ALL')">All Categories</button>
+          ${(hubData.sections || []).map(s => `
+            <button class="filter-pill" data-cat="${s.id}" onclick="selectCategory('${s.id}')">${s.title}</button>
+          `).join('')}
+        `;
+
+        renderHub();
+
+        if (loaderEl) {
+          setTimeout(() => loaderEl.classList.add('hidden'), 180);
+        }
+      } catch (err) {
+        if (loaderEl) loaderEl.classList.add('hidden');
+        appContainer.innerHTML = `
+          <div style="background:#ef444422; border:1px solid #ef4444; border-radius:12px; padding:2rem; text-align:center; color:#fca5a5;">
+            <h3>Error loading dashboard</h3>
+            <p style="margin-top:0.5rem; font-size:0.9rem;">${err.message}</p>
+          </div>`;
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const searchInput = document.getElementById('tool-search');
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      } else if (e.key === '/' && document.activeElement !== searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+      } else if (e.key === 'Enter' && document.activeElement === searchInput && searchInput.value.trim()) {
+        const firstVisible = Array.from(document.querySelectorAll('.link-card')).find(c => c.style.display !== 'none');
+        if (firstVisible && firstVisible.href && !firstVisible.href.endsWith('#')) {
+          window.open(firstVisible.href, '_blank', 'noopener');
+        }
+      }
+    });
+
+    loadHub();
+  </script>
+
+  <script>
+    (function initSmoothScrollUI() {
+      const bar = document.getElementById('scroll-progress');
+      const btn = document.getElementById('scroll-top-btn');
+      function onScroll() {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        if (bar) {
+          bar.style.width = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) + '%' : '0%';
+        }
+        if (btn) {
+          btn.classList.toggle('visible', scrollTop > 220);
+        }
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+  </script>
+
+</body>
+</html>
