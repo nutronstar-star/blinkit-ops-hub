@@ -305,10 +305,43 @@
       max-width: 1440px;
       width: 100%;
       margin: 1.25rem auto 0;
-      padding: 0 1.75rem;
+      padding: 0 1.75rem 0.65rem;
       display: flex;
-      gap: 0.45rem;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 0.55rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent-color, #f8cb46) rgba(255, 255, 255, 0.05);
+    }
+    .filter-bar::-webkit-scrollbar {
+      height: 5px;
+    }
+    .filter-bar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 999px;
+      margin: 0 1.75rem;
+    }
+    body.light-theme .filter-bar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.07);
+    }
+    .filter-bar::-webkit-scrollbar-thumb {
+      background: linear-gradient(90deg, var(--primary-color, #0c831f), var(--accent-color, #f8cb46));
+      border-radius: 999px;
+    }
+    .filter-bar::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-color, #f8cb46);
+    }
+    @media (max-width: 640px) {
+      .filter-bar {
+        padding: 0 1rem 0.6rem;
+      }
+      .filter-bar::-webkit-scrollbar-track {
+        margin: 0 1rem;
+      }
     }
 
     .filter-pill {
@@ -318,10 +351,11 @@
       font-family: inherit;
       font-size: 0.78rem;
       font-weight: 500;
-      padding: 0.4rem 0.85rem;
+      padding: 0.42rem 0.9rem;
       border-radius: 8px;
       cursor: pointer;
       white-space: nowrap;
+      flex-shrink: 0;
       transition: var(--transition);
     }
 
@@ -960,10 +994,25 @@
     function selectCategory(catId) {
       activeCategory = catId;
       document.querySelectorAll('.filter-pill').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.cat === catId);
+        const isMatch = btn.dataset.cat === catId;
+        btn.classList.toggle('active', isMatch);
+        if (isMatch) {
+          btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
       });
       applyFilters();
     }
+
+    (function enableCategoryWheelScroll() {
+      const bar = document.getElementById('filter-bar');
+      if (!bar) return;
+      bar.addEventListener('wheel', (e) => {
+        if (bar.scrollWidth > bar.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+          e.preventDefault();
+          bar.scrollLeft += e.deltaY;
+        }
+      }, { passive: false });
+    })();
 
     function renderCardHTML(item) {
       const isPinned = pinnedIds.includes(item.id);
